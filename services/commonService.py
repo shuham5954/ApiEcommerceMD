@@ -77,3 +77,43 @@ async def createUser(data):
       return {"message": "User created successfully"}
     else:
       raise HTTPException(status_code=response.status_code, detail=response.json())
+
+async def get_user_info(user_name:str):
+ 
+  token = await get_access_token()
+  hea = {
+         "authorization":f"Bearer {token}",
+         "Content-Type": "application/json"
+        }
+  url = f"{KEYCLOAK_BASE_URL}/admin/realms/{KEYCLOAK_REALM}/users?username={user_name}"
+  async with httpx.AsyncClient() as client:
+    response = await client.get(url,headers=hea)
+    if response.status_code == 201 or response.status_code == 204:
+      user_details = response.json().get("detail", [])
+      if user_details:
+                return user_details[0]["id"]  # Return the id of the 
+    else:
+      raise HTTPException(status_code=response.status_code, detail=response.json())
+  
+
+
+async def assign_role(data):
+  user_id = data.user_id
+  token = await get_access_token()
+  hea = {
+         "authorization":f"Bearer {token}",
+         "Content-Type": "application/json"
+        }
+  url = f"{KEYCLOAK_BASE_URL}/admin/realms/{KEYCLOAK_REALM}/users/{user_id}/role-mappings/realm"
+    # http://localhost:8080/auth/admin/realms/{your-realm}/users/{user-id}/role-mappings/realm
+  payload={[{
+        "id": data.role_id,
+        "name": data.role_name}]}
+  async with httpx.AsyncClient() as client:
+    response = await client.post(url,url,json=payload,headers=hea)
+    if response.status_code == 201 or response.status_code == 204:
+      return response.status_code
+    else:
+      raise HTTPException(status_code=response.status_code, detail=response.json())
+    
+  return True

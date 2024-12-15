@@ -2,7 +2,7 @@ from fastapi import FastAPI, APIRouter, HTTPException, status
 from fastapi_utils.inferring_router import InferringRouter
 from pydantic import BaseModel
 from models.account import UserLogIn , UserCreate
-from services.commonService import createUser , get_access_token ,get_refresh_token
+from services.commonService import createUser , get_access_token ,get_refresh_token ,get_user_info
 
 router = InferringRouter()
 
@@ -33,4 +33,11 @@ async def refresh_token(ref_token : str | None):
 
     except HTTPException as e:
         raise HTTPException(status_code=e.status_code, detail=e.detail)
-    
+
+@router.get("/get_user_name")
+async def get_user_details():
+    try:
+        status = await get_user_info("shubhamtest4")
+        return status    
+    except HTTPException as e:
+        raise HTTPException(status_code=e.status_code,detail=e.detail)
