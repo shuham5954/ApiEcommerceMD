@@ -1,16 +1,22 @@
 from pydantic import BaseModel
 
-class UserLogIn(BaseModel): 
-    userName: str = ''
+class user_log_in(BaseModel): 
+    user_name: str = ''
     password: str = ''
 
+class user_token(BaseModel):
+    user_name:str 
+    password:str 
+    grant_type:str
+    
+
 class TokenRequest(BaseModel):
-    username: str
+    user_name: str
     password: str
 
 class UserCreate(BaseModel):
-    username: str
-    phoneNumber: int
+    user_name: str
+    phone_number: int
     email: str
     password: str
     
