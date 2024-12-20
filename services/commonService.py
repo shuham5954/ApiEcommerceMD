@@ -4,6 +4,7 @@ import os
 from dotenv import load_dotenv
 import requests
 from models.account import user_log_in , UserCreate
+from fastapi.responses import JSONResponse
 
 load_dotenv()
 
@@ -78,7 +79,7 @@ async def createUser(data):
       user_id = await get_user_info(data.user_name)
       print(user_id)
       await assign_role(user_id)
-      return {"message": "User created successfully"}
+      return JSONResponse(content={"message": "User created successfully" , "status_code":response.status_code})
     else:
       raise HTTPException(status_code=response.status_code, detail=response.json())
 
@@ -135,7 +136,7 @@ async def user_token(data:user_log_in):
   async with httpx.AsyncClient() as client:
     response = await client.post(url , data= payload )
     if response.status_code == 200:
-      return response.json()
+      return JSONResponse(content={"message": "sucess logIn" , "status_code":response.status_code})
     else:
       print("Error:", response.status_code, response.text)
 
