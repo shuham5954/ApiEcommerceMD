@@ -60,11 +60,11 @@ async def createUser(data):
         }
   url=f"{KEYCLOAK_BASE_URL}/admin/realms/{KEYCLOAK_REALM}/users"
   payload={
-          "username": data.username,
+          "username": data.user_name,
           "email": data.email,
           "enabled": True,
           "attributes": {
-          "mobile_number": data.phoneNumber  
+          "mobile_number": data.phone_number  
                         },
           "credentials": [{
             "type": "password",
@@ -75,7 +75,7 @@ async def createUser(data):
   async with httpx.AsyncClient() as client:
     response = await client.post(url,json=payload,headers=hea)
     if response.status_code == 201:
-      user_id = await get_user_info(data.username)
+      user_id = await get_user_info(data.user_name)
       print(user_id)
       await assign_role(user_id)
       return {"message": "User created successfully"}
@@ -129,7 +129,7 @@ async def user_token(data:user_log_in):
       "client_id": CLIENT_ID,
       "client_secret": CLIENT_SECRET,
       "username":data.user_name,
-      "password":data.user_password
+      "password":data.password
     
    }
   async with httpx.AsyncClient() as client:
