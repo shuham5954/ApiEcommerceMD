@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 import requests
 from models.account import user_log_in , UserCreate
 from fastapi.responses import JSONResponse
+from imagekitio import ImageKit
 
 load_dotenv()
 
@@ -12,6 +13,12 @@ KEYCLOAK_BASE_URL = os.getenv("KEYCLOAK_URL")
 KEYCLOAK_REALM = os.getenv("REALM")            
 CLIENT_ID = os.getenv("CLIENT_ID")             
 CLIENT_SECRET = os.getenv("CLIENT_SECRET")
+
+
+IMAGEKIT_PUBLIC_KEY = os.getenv("IMAGEKIT_PUBLIC_KEY")
+IMAGEKIT_PRIVATE_KEY = os.getenv("IMAGEKIT_PRIVATE_KEY")
+IMAGEKIT_URL = os.getenv("IMAGEKIT_URL")
+
 
 async def get_access_token():
 
@@ -140,8 +147,38 @@ async def user_token(data:user_log_in):
     else:
       print("Error:", response.status_code, response.text)
 
-      
-  
+
+# for upload img ----
+# async def upload_image(file: UploadFile = File(...)):
+async def upload_image_ser(data):
+    try:
+        # Validate file content type
+        if not data.content_type.startswith("image/"):
+            raise HTTPException(status_code=400, detail="Invalid file type. Please upload an image.")
+        payload = {
+            "fileName": data.filename,
+            "publicKey": IMAGEKIT_PUBLIC_KEY,
+        }
+        files = {
+            "file": (data.filename, await data.read(), data.content_type)
+        }
+        
+        # Send the file directly to ImageKit API
+        response = requests.post(
+            IMAGEKIT_URL,
+            data=payload,
+            files=files,
+            auth=(IMAGEKIT_PRIVATE_KEY, "")
+        )
+        
+        # Handle API response
+        if response.status_code == 200:
+            return JSONResponse(content=response.json())
+        else:
+            raise HTTPException(status_code=response.status_code, detail=response.json())
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 

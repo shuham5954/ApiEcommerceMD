@@ -1,10 +1,22 @@
-from fastapi import FastAPI, APIRouter, HTTPException, status,Form, UploadFile
+from fastapi import FastAPI, APIRouter, HTTPException, status,Form, FastAPI, File, UploadFile ,Form
+from fastapi.responses import JSONResponse  # Import JSONResponse
 from fastapi_utils.inferring_router import InferringRouter
 from pydantic import BaseModel
 from models.account import user_log_in , UserCreate
-from services.commonService import createUser , get_access_token ,get_refresh_token ,get_user_info ,user_token
+from services.commonService import createUser , get_access_token ,get_refresh_token ,get_user_info ,user_token ,upload_image_ser
+from imagekitio import ImageKit
+import shutil  # Import shutil for file handling
+import os
+import httpx
+import requests
+import hashlib
+import secrets
+import time
+import base64
 
 router = InferringRouter()
+
+
 
 @router.post("/logIn")
 async def logIn(res:user_log_in):
@@ -43,5 +55,14 @@ async def get_user_details():
     try:
         status = await get_user_info("shubhamtest4")
         return status    
+    except HTTPException as e:
+        raise HTTPException(status_code=e.status_code,detail=e.detail)
+
+
+@router.post("/upload-image/")
+async def upload_image(file: UploadFile = File(...)):
+    try:
+       status = await upload_image_ser(file)
+       return status 
     except HTTPException as e:
         raise HTTPException(status_code=e.status_code,detail=e.detail)
